@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <dirent.h>
 
 #define MATCH(a, b) strcmp(a, b) == 0
 
@@ -15,10 +16,30 @@
 #define STR_POWER_SAVER "power-saver"
 #define STR_BALANCED "balanced"
 #define STR_PERFORMANCE "performance"
+char* find_device(char* device){
+	DIR *dir;
+	int fd,rc;
+	struct dirent *entry;
+    struct libevdec *dev = NULL;
+	char *input_dir = "/dev/input/";
+	dir = opendir(input_dir);
+	while((entry = readdir(dir))!=NULL){
+		if (strncmp(entry->d_name,"event",5)==0){
+			sprintf(device,"%s%s",input_dir,entry->d_name);
+    			fd = open(device, O_RDONLY | O_NONBLOCK);
+			rc = libevdev_new_from_fd(fd,&dev);
+			if(rc >=0 && MATCH("Ideapad extra buttons",libevdev_get_name(dev))){
+                return device;
+			}
+		}
+	}
+	closedir(dir);
+    return NULL;
+}
 
 int get_state()
 {
-
+    setbuf(stdout, NULL);
     char *cmd = "powerprofilesctl get";
     char result[50] = {0};
     FILE *fp = NULL;
@@ -85,28 +106,20 @@ void toggle()
 
 int main()
 {
+    char device[50];
+    find_device(device);
+
     struct libevdev *dev = NULL;
     int fd;
     int rc = 1;
 
-    fd = open("/dev/input/bypath/pci-0000:00:14.3-platform-VPC2004:00-event", O_RDONLY | O_NONBLOCK);
+    fd = open(device, O_RDONLY | O_NONBLOCK);
     rc = libevdev_new_from_fd(fd, &dev);
     if (rc < 0)
     {
         fprintf(stderr, "Failed to init libevdev (%s)\n", strerror(-rc));
         exit(1);
     }
-    // printf("Input device name: \"%s\"\n", libevdev_get_name(dev));
-    // printf("Input device ID: bus %#x vendor %#x product %#x\n",
-    //        libevdev_get_id_bustype(dev),
-    //        libevdev_get_id_vendor(dev),
-    //        libevdev_get_id_product(dev));
-    // if (!libevdev_has_event_type(dev, EV_REL) ||
-    //     !libevdev_has_event_code(dev, EV_KEY, BTN_LEFT))
-    // {
-    //     printf("This device does not look like a mouse\n");
-    //     exit(1);
-    // }
 
     do
     {
