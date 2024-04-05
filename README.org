@@ -1,0 +1,13 @@
+#+title: XiaoxinD
+* Summary
+XiaoxinD (XD) is a util for ~Lenovo Xiaoxin Laptop~ .
+
+** How it works
+~XiaoxinD~ monitor ~/dev/input/eventX~ , whose name is ~Ideapad extra buttons~ .
+When ~Fn+Q~ is pressed, ~XiaoxinD~ calculate the next ~power_state~ and use ~powerprofilesctl~ to set it.
+
+** Installation
+#+begin_src shell
+  sudo make install
+  systemctl enable --now xiaoxind
+#+end_src
