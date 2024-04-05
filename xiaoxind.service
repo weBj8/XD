@@ -1,0 +1,11 @@
+[Unit]
+Description=xiaoxind daemon
+Requires=local-fs.target
+After=local-fs.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/xiaoxind
+
+[Install]
+WantedBy=sysinit.target

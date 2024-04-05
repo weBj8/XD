@@ -15,3 +15,7 @@ $(TARGET): $(OBJS)
 
 clean:
 	rm -f $(OBJS) $(TARGET)
+
+install: all
+	install -Dm755 $(TARGET) /usr/local/bin/$(TARGET)
+	install -Dm644 $(TARGET).service /etc/systemd/system/$(TARGET).service
